@@ -3,7 +3,7 @@
 
 ### Interactive 4D Visualizer / 4次元正24胞体インタラクティブモデル
 * **[▶ Launch 24-Cell (16 + 8) 4D Interactive Visualizer](https://mu-300.github.io/MU-300/24_16_8_4d.html)**
-  *(Interactive 4D projection of the 24-cell decomposing into 8 pure integer units $Q_8$ and 16 half-integer units, with chiral isoclinic rotation controls)*
+  *(Interactive 4D projection of the 24-cell decomposing into 8 pure integer units  $Q_8$  and 16 half-integer units, with chiral isoclinic rotation controls)*
 
 ---
 
