@@ -3,15 +3,14 @@
 
 ### Interactive 4D Visualizer / 4次元正24胞体インタラクティブモデル
 * **[▶ Launch 24-Cell (16 + 8) 4D Interactive Visualizer](https://mu-300.github.io/MU-300/24_16_8_4d.html)**
-  *(Interactive 4D projection of the 24-cell decomposing into 8 pure integer units Q_8 and 16 half-integer units, with chiral isoclinic rotation controls)*
-
+  <br><i>(Interactive 4D projection of the 24-cell decomposing into 8 pure integer units $Q_8$ and 16 half-integer units, with chiral isoclinic rotation controls)</i>
 ---
 
 ## Unified Architecture Overview / 全体の一貫性と統一原理
 
 All five repositories in this project are governed by a single discrete algebraic mechanism: **orthogonal projection** ($P_1 + P_2 = 1,\; P_1 P_2 = 0$) operating under a fundamental cyclic frame rate ($C_n$), without continuous clocks or metric rulers. Across every scale—from wireless modulation and particle generations to solar fusion and rotating black holes—the same dual process repeats: **condensing symmetry into a closed principal ideal ($P_1$)** while **ejecting residual degrees of freedom as orthogonal exhaust ($P_2$, structural apoptosis)**.
 
-本プロジェクトの5つのリポジトリは、すべて同一の離散代数メカニズム——**基本フレームレート $C_n$ のもとでの直交射影（ $P_1 + P_2 = 1,\; P_1 P_2 = 0$ ）**——によって貫かれています。通信変調から宇宙相転移、素粒子、太陽核融合、回転ブラックホールに至るあらゆる階層において、**「対称性を閉じた単項イデアル（ $P_1$ ）へ回収・凝縮する作用」**と**「余剰自由度を直交補空間（ $P_2$ ）へアポトーシス排出する作用」**が自己相似的に繰り返されます。
+本プロジェクトの5つのリポジトリは、すべて同一の離散代数メカニズム――**基本フレームレート $C_n$ のもとでの直交射影 ( $P_1 + P_2 = 1, P_1 P_2 = 0$ )** ――によって貫かれています。通信変調から宇宙相転移、素粒子、太陽核融合、回転ブラックホールに至るあらゆる階層において、**「対称性を閉じた単項イデアル ( $P_1$ ) へ回収・凝縮する作用」**と**「余剰自由度を直交補空間 ( $P_2$ ) へアポトーシス排出する作用」**が自己相似的に繰り返されます。
 
 | Scale & Domain / 階層・領域 | Internal Condensation ($P_1$: Principal Ideal) / 内部への回収 | Orthogonal Exhaust ($P_2$: Apoptosis) / 余剰自由度の排出 | Repository / リポジトリ |
 | :--- | :--- | :--- | :--- |
