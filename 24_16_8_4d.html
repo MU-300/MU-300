@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>正24胞体 = 正16胞体 + 正8胞体（フルヴィッツ整数単元ビジュアライザー）</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+      background-color: #050811;
+      color: #e2e8f0;
+      overflow-x: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Custom glowing styles */
+    .glow-red {
+      box-shadow: 0 0 18px rgba(244, 63, 94, 0.35), inset 0 0 10px rgba(244, 63, 94, 0.15);
+    }
+    .glow-blue {
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.35), inset 0 0 10px rgba(56, 189, 248, 0.15);
+    }
+    .glow-gold {
+      box-shadow: 0 0 18px rgba(250, 204, 21, 0.25), inset 0 0 10px rgba(250, 204, 21, 0.1);
+    }
+    /* Range slider styling */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(30, 41, 59, 0.8);
+      height: 6px;
+      border-radius: 999px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+    canvas {
+      touch-action: none;
+      display: block;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#050811] text-slate-100">
+
+  <!-- Header -->
+  <header class="w-full border-b border-slate-800/80 bg-[#080d1a]/90 backdrop-blur-md px-4 py-3 z-20">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="px-2 py-0.5 text-xs font-semibold rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            Hurwitz Units (24)
+          </span>
+          <h1 class="text-base sm:text-xl font-bold tracking-tight text-white">
+            正24胞体 ＝ <span class="text-rose-400">正16胞体 (8頂点)</span> ＋ <span class="text-sky-400">正8胞体 (16頂点)</span>
+          </h1>
+        </div>
+        <p class="text-xs text-slate-400 mt-0.5">
+          下のスイッチで各胞体の表示を切り替え、ドラッグで回転・頂点クリックで四元数座標を確認できます
+        </p>
+      </div>
+      <div class="flex items-center gap-2 self-start sm:self-center">
+        <button id="btn-preset-classic" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">
+          初期アングルに戻す
+        </button>
+        <button id="btn-auto-4d" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 transition flex items-center gap-1.5">
+          <span id="auto-dot" class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+          <span>4D回転: ON</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+    <!-- Left/Center: Interactive 4D->3D Canvas -->
+    <section class="lg:col-span-8 relative rounded-2xl border border-slate-800/90 bg-gradient-to-b from-[#070b16] to-[#03050c] overflow-hidden flex flex-col min-h-[420px] sm:min-h-[540px] shadow-2xl">
+      
+      <!-- Top Floating Legend / Quick Filter Pills inside Canvas -->
+      <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+        <div class="flex flex-wrap gap-1.5 pointer-events-auto">
+          <button id="pill-all" class="px-2.5 py-1 text-xs font-medium rounded-full bg-slate-800/90 hover:bg-slate-700 text-white border border-slate-600/80 backdrop-blur transition">
+            すべて表示
+          </button>
+          <button id="pill-16" class="px-2.5 py-1 text-xs font-medium rounded-full bg-rose-950/80 hover:bg-rose-900/80 text-rose-200 border border-rose-500/40 backdrop-blur transition">
+            正16胞体のみ
+          </button>
+          <button id="pill-8" class="px-2.5 py-1 text-xs font-medium rounded-full bg-sky-950/80 hover:bg-sky-900/80 text-sky-200 border border-sky-500/40 backdrop-blur transition">
+            正8胞体のみ
+          </button>
+        </div>
+
+        <div class="text-[11px] text-slate-400 bg-slate-900/75 px-2.5 py-1 rounded-full border border-slate-800 backdrop-blur">
+          ドラッグ: 3D回転 / ホイール・ピンチ: 拡大縮小
+        </div>
+      </div>
+
+      <!-- Canvas Container -->
+      <div id="canvas-wrapper" class="relative flex-1 w-full h-full cursor-grab active:cursor-grabbing">
+        <canvas id="polytope-canvas" class="w-full h-full"></canvas>
+      </div>
+
+      <!-- Selected / Hovered Vertex Inspector Bar -->
+      <div id="vertex-inspector" class="border-t border-slate-800/90 bg-[#080d1a]/95 px-4 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        <div class="flex items-center gap-2.5">
+          <span id="inspector-badge" class="px-2 py-0.5 rounded font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+            頂点未選択
+          </span>
+          <span id="inspector-quat" class="mono text-sm font-semibold text-white">
+            頂点をクリックまたはホバーすると四元数座標を表示します
+          </span>
+        </div>
+        <div id="inspector-coord" class="mono text-slate-400 text-[11px]">
+          (a, b, c, d) ∈ S³ ⊂ ℝ⁴
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Controls & Mathematical Structure -->
+    <aside class="lg:col-span-4 flex flex-col gap-3.5">
+
+      <!-- Layer Selection Panel -->
+      <div class="rounded-2xl border border-slate-800 bg-[#0a1020]/90 p-4 shadow-lg">
+        <h2 class="text-sm font-bold text-slate-200 mb-3 flex items-center justify-between">
+          <span>表示レイヤーの選択</span>
+          <span class="text-[11px] font-normal text-slate-400">チェックで表示/非表示</span>
+        </h2>
+
+        <div class="space-y-2.5">
+          <!-- 16-Cell Toggle -->
+          <label id="card-16cell" class="flex items-start gap-3 p-3 rounded-xl border border-rose-500/40 bg-rose-950/20 hover:bg-rose-950/30 cursor-pointer transition glow-red">
+            <input type="checkbox" id="toggle-16cell" checked class="mt-1 w-4 h-4 accent-rose-500 rounded cursor-pointer" />
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-sm text-rose-300">正16胞体 (16-cell)</span>
+                <span class="mono text-[11px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-200">8頂点 / 24辺</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1">
+                整数型の単元：<span class="mono text-rose-200">±1, ±i, ±j, ±k</span>
+              </p>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                4次元直交軸上の頂点（辺の長さは √2）
+              </p>
+            </div>
+          </label>
+
+          <!-- 8-Cell Toggle -->
+          <label id="card-8cell" class="flex items-start gap-3 p-3 rounded-xl border border-sky-500/40 bg-sky-950/20 hover:bg-sky-950/30 cursor-pointer transition glow-blue">
+            <input type="checkbox" id="toggle-8cell" checked class="mt-1 w-4 h-4 accent-sky-400 rounded cursor-pointer" />
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-sm text-sky-300">正8胞体 / 超立方体 (8-cell)</span>
+                <span class="mono text-[11px] px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-200">16頂点 / 32辺</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1">
+                半整数型の単元：<span class="mono text-sky-200">(±1 ± i ± j ± k) / 2</span>
+              </p>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                正16胞体の双対となる4次元超立方体（辺の長さは 1）
+              </p>
+            </div>
+          </label>
+
+          <!-- 24-Cell Cross Edges Toggle -->
+          <label id="card-24edges" class="flex items-start gap-3 p-3 rounded-xl border border-amber-500/35 bg-amber-950/15 hover:bg-amber-950/25 cursor-pointer transition glow-gold">
+            <input type="checkbox" id="toggle-24edges" checked class="mt-1 w-4 h-4 accent-amber-400 rounded cursor-pointer" />
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-sm text-amber-300">正24胞体の結合辺</span>
+                <span class="mono text-[11px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-200">64辺 (計96辺)</span>
+              </div>
+              <p class="text-xs text-slate-300 mt-1">
+                正16胞体(8点)と正8胞体(16点)を結ぶ距離1の辺
+              </p>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                正8胞体の32辺 ＋ 結合辺64辺 ＝ <strong class="text-amber-200">正24胞体の全96辺</strong>（すべて長さ1）
+              </p>
+            </div>
+          </label>
+        </div>
+
+        <!-- Additional Display Options -->
+        <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2 text-xs">
+          <label class="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+            <input type="checkbox" id="toggle-labels" checked class="w-3.5 h-3.5 accent-indigo-400 rounded" />
+            <span>主要頂点のラベル表示</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+            <input type="checkbox" id="toggle-faces" checked class="w-3.5 h-3.5 accent-sky-400 rounded" />
+            <span>超立方体の半透明面</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 4D Rotation Controls -->
+      <div class="rounded-2xl border border-slate-800 bg-[#0a1020]/90 p-4 shadow-lg">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-sm font-bold text-slate-200">アイソクリニック回転の分離比較</h2>
+          <span id="rotation-mode-badge" class="mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            左掛け: q_L · x
+          </span>
+        </div>
+
+        <!-- Isoclinic Rotation Mode Buttons -->
+        <div class="grid grid-cols-1 gap-1.5 mb-3">
+          <button id="mode-left" class="w-full text-left px-3 py-2 rounded-xl border border-emerald-400/60 bg-emerald-950/40 text-emerald-200 transition flex items-center justify-between">
+            <div>
+              <div class="text-xs font-bold">左アイソクリニック回転 <span class="mono text-[11px] text-emerald-300">(q_L · x)</span></div>
+              <div class="text-[10px] text-emerald-200/75">右ねじのキラル渦：全点が静止軸なしで一斉循環</div>
+            </div>
+            <span class="mono text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/25 text-emerald-200">左キラル</span>
+          </button>
+
+          <button id="mode-right" class="w-full text-left px-3 py-2 rounded-xl border border-slate-700/80 bg-slate-900/50 hover:bg-slate-800/70 text-slate-300 transition flex items-center justify-between">
+            <div>
+              <div class="text-xs font-bold">右アイソクリニック回転 <span class="mono text-[11px] text-purple-300">(x · q_R⁻¹)</span></div>
+              <div class="text-[10px] text-slate-400">左ねじのキラル渦：鏡像のねじれ方向で循環</div>
+            </div>
+            <span class="mono text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">右キラル</span>
+          </button>
+
+          <button id="mode-conj" class="w-full text-left px-3 py-2 rounded-xl border border-slate-700/80 bg-slate-900/50 hover:bg-slate-800/70 text-slate-300 transition flex items-center justify-between">
+            <div>
+              <div class="text-xs font-bold">複合回転 / 共役 <span class="mono text-[11px] text-amber-300">(q · x · q⁻¹)</span></div>
+              <div class="text-[10px] text-slate-400">実軸(±1)を固定した通常の3D剛体回転（ねじれ無し）</div>
+            </div>
+            <span class="mono text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">非キラル</span>
+          </button>
+        </div>
+
+        <!-- Generator Axis & Trail Controls -->
+        <div class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800 mb-3 space-y-2 text-xs">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-slate-400">回転生成軸 u :</span>
+            <div class="flex gap-1">
+              <button id="axis-c6" class="px-2 py-1 rounded bg-indigo-500/30 border border-indigo-400/50 text-indigo-200 mono text-[11px] font-semibold">
+                C₆ (i+j+k)/√3
+              </button>
+              <button id="axis-c4" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 mono text-[11px]">
+                C₄ (i軸)
+              </button>
+            </div>
+          </div>
+          <label class="flex items-center justify-between cursor-pointer text-slate-300 hover:text-white pt-1 border-t border-slate-800/80">
+            <span>軌跡（クリフォード繊維 / 渦の流れ）</span>
+            <input type="checkbox" id="toggle-trails" checked class="w-3.5 h-3.5 accent-emerald-400 rounded" />
+          </label>
+        </div>
+
+        <!-- Manual 4D Offset Sliders -->
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold text-slate-300">手動4D位相・角度調整</span>
+          <button id="btn-reset-4d" class="text-[11px] text-sky-400 hover:text-sky-300 underline">
+            角度リセット
+          </button>
+        </div>
+        <div class="space-y-2.5 text-xs">
+          <div>
+            <div class="flex justify-between text-slate-400 mb-1">
+              <span>アイソクリニック位相角 θ</span>
+              <span id="val-iso" class="mono text-slate-200">0°</span>
+            </div>
+            <input type="range" id="slider-iso" min="0" max="360" value="0" class="w-full" />
+          </div>
+          <div>
+            <div class="flex justify-between text-slate-400 mb-1">
+              <span>XW平面チルト（投影角）</span>
+              <span id="val-xw" class="mono text-slate-200">20°</span>
+            </div>
+            <input type="range" id="slider-xw" min="0" max="360" value="20" class="w-full" />
+          </div>
+          <div>
+            <div class="flex justify-between text-slate-400 mb-1">
+              <span>YW平面チルト（投影角）</span>
+              <span id="val-yw" class="mono text-slate-200">15°</span>
+            </div>
+            <input type="range" id="slider-yw" min="0" max="360" value="15" class="w-full" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Concise Mathematical Note -->
+      <div class="rounded-2xl border border-slate-800/80 bg-[#080d1a]/80 p-3.5 text-xs text-slate-300 space-y-1.5">
+        <div class="font-bold text-slate-100 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>分離すると何が起きるか？（対称性とカイラリティ）</span>
+        </div>
+        <p id="mode-explanation" class="text-slate-400 leading-relaxed">
+          <strong class="text-emerald-300">左アイソクリニック回転 (q_L·x)</strong> では、正24胞体の形そのものの対称性は保たれたまま、すべての頂点が静止軸なしで一斉に螺旋軌道（ヴィラソー円）を描き、内と外が裏返るように循環します。右回転に切り替えると渦の巻き方が逆転します。
+        </p>
+      </div>
+
+    </aside>
+  </main>
+
+  <script>
+    /**
+     * 4D -> 3D -> 2D Interactive Visualizer for the 24-cell (Hurwitz Integer Units)
+     * Supports Left Isoclinic (q_L * x), Right Isoclinic (x * q_R^-1), and Conjugation (q * x * q^-1).
+     */
+
+    (function () {
+      const canvas = document.getElementById('polytope-canvas');
+      const ctx = canvas.getContext('2d');
+      const wrapper = document.getElementById('canvas-wrapper');
+
+      // UI Elements
+      const toggle16 = document.getElementById('toggle-16cell');
+      const toggle8 = document.getElementById('toggle-8cell');
+      const toggle24Edges = document.getElementById('toggle-24edges');
+      const toggleLabels = document.getElementById('toggle-labels');
+      const toggleFaces = document.getElementById('toggle-faces');
+      const toggleTrails = document.getElementById('toggle-trails');
+
+      const card16 = document.getElementById('card-16cell');
+      const card8 = document.getElementById('card-8cell');
+      const card24Edges = document.getElementById('card-24edges');
+
+      // Mode & Axis Controls
+      const modeLeftBtn = document.getElementById('mode-left');
+      const modeRightBtn = document.getElementById('mode-right');
+      const modeConjBtn = document.getElementById('mode-conj');
+      const rotationModeBadge = document.getElementById('rotation-mode-badge');
+      const modeExplanation = document.getElementById('mode-explanation');
+
+      const axisC6Btn = document.getElementById('axis-c6');
+      const axisC4Btn = document.getElementById('axis-c4');
+
+      const sliderIso = document.getElementById('slider-iso');
+      const sliderXW = document.getElementById('slider-xw');
+      const sliderYW = document.getElementById('slider-yw');
+      const valIso = document.getElementById('val-iso');
+      const valXW = document.getElementById('val-xw');
+      const valYW = document.getElementById('val-yw');
+
+      const btnAuto4D = document.getElementById('btn-auto-4d');
+      const btnPresetClassic = document.getElementById('btn-preset-classic');
+      const btnReset4D = document.getElementById('btn-reset-4d');
+
+      const pillAll = document.getElementById('pill-all');
+      const pill16 = document.getElementById('pill-16');
+      const pill8 = document.getElementById('pill-8');
+
+      const inspectorBadge = document.getElementById('inspector-badge');
+      const inspectorQuat = document.getElementById('inspector-quat');
+      const inspectorCoord = document.getElementById('inspector-coord');
+
+      // State
+      const state = {
+        show16: true,
+        show8: true,
+        show24Edges: true,
+        showLabels: true,
+        showFaces: true,
+        showTrails: true,
+        auto4D: true,
+        rotationMode: 'left', // 'left' | 'right' | 'conj'
+        generatorAxis: 'c6',  // 'c6' (1,1,1)/sqrt(3) | 'c4' (1,0,0)
+        isoAngle: 0,
+        // 4D viewing tilt angles (radians)
+        angleXW: (20 * Math.PI) / 180,
+        angleYW: (15 * Math.PI) / 180,
+        // 3D camera orientation
+        rotX: 0.34,
+        rotY: -0.55,
+        zoom: 1.0,
+        hoveredIndex: -1,
+        selectedIndex: -1,
+      };
+
+      // Quaternion algebra helpers: q = [w, x, y, z]
+      function qMul(a, b) {
+        return [
+          a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3],
+          a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2],
+          a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1],
+          a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0],
+        ];
+      }
+
+      function qConj(a) {
+        return [a[0], -a[1], -a[2], -a[3]];
+      }
+
+      function getUnitGenerator(theta) {
+        const c = Math.cos(theta);
+        const s = Math.sin(theta);
+        if (state.generatorAxis === 'c6') {
+          const invSqrt3 = 1 / Math.sqrt(3);
+          return [c, s * invSqrt3, s * invSqrt3, s * invSqrt3];
+        } else {
+          return [c, s, 0, 0];
+        }
+      }
+
+      function applyQuaternionAction(coords, theta) {
+        const q = getUnitGenerator(theta);
+        if (state.rotationMode === 'left') {
+          // Left isoclinic: q_L * x
+          return qMul(q, coords);
+        } else if (state.rotationMode === 'right') {
+          // Right isoclinic: x * q_R^{-1}
+          return qMul(coords, qConj(q));
+        } else {
+          // Conjugation (3D rotation): q * x * q^{-1}
+          return qMul(qMul(q, coords), qConj(q));
+        }
+      }
+
+      // Build 24 vertices of Hurwitz units
+      const vertices = [];
+      const axisNames = ['1', 'i', 'j', 'k'];
+
+      // 1. 16-cell vertices (indices 0..7)
+      for (let axis = 0; axis < 4; axis++) {
+        for (const sign of [1, -1]) {
+          const coords = [0, 0, 0, 0];
+          coords[axis] = sign;
+          const label = (sign === 1 ? '+' : '-') + axisNames[axis];
+          vertices.push({
+            id: vertices.length,
+            type: '16-cell',
+            coords,
+            label,
+            shortLabel: label,
+            coordText: `(${coords.join(', ')})`,
+          });
+        }
+      }
+
+      // 2. 8-cell (Tesseract) vertices (indices 8..23)
+      for (let mask = 0; mask < 16; mask++) {
+        const signs = [
+          mask & 1 ? -1 : 1,
+          mask & 2 ? -1 : 1,
+          mask & 4 ? -1 : 1,
+          mask & 8 ? -1 : 1,
+        ];
+        const coords = signs.map((s) => s * 0.5);
+        const terms = signs.map((s, idx) => {
+          const prefix = idx === 0 ? (s === 1 ? '' : '-') : (s === 1 ? '+' : '-');
+          return prefix + axisNames[idx];
+        });
+        const label = `(${terms.join('')})/2`;
+        vertices.push({
+          id: vertices.length,
+          type: '8-cell',
+          coords,
+          label,
+          shortLabel: '',
+          coordText: `(${signs.map((s) => (s === 1 ? '+1/2' : '-1/2')).join(', ')})`,
+        });
+      }
+
+      function distSq4D(a, b) {
+        let sum = 0;
+        for (let d = 0; d < 4; d++) {
+          const diff = a[d] - b[d];
+          sum += diff * diff;
+        }
+        return sum;
+      }
+
+      const edges16 = [];
+      const edges8 = [];
+      const edgesCross = [];
+
+      for (let i = 0; i < vertices.length; i++) {
+        for (let j = i + 1; j < vertices.length; j++) {
+          const d2 = distSq4D(vertices[i].coords, vertices[j].coords);
+          const vA = vertices[i];
+          const vB = vertices[j];
+
+          if (vA.type === '16-cell' && vB.type === '16-cell') {
+            if (Math.abs(d2 - 2.0) < 1e-5) edges16.push([i, j]);
+          } else if (vA.type === '8-cell' && vB.type === '8-cell') {
+            if (Math.abs(d2 - 1.0) < 1e-5) edges8.push([i, j]);
+          } else {
+            if (Math.abs(d2 - 1.0) < 1e-5) edgesCross.push([i, j]);
+          }
+        }
+      }
+
+      const faces8 = [];
+      for (let d1 = 0; d1 < 4; d1++) {
+        for (let d2 = d1 + 1; d2 < 4; d2++) {
+          const fixedDims = [0, 1, 2, 3].filter((d) => d !== d1 && d !== d2);
+          for (const sA of [-0.5, 0.5]) {
+            for (const sB of [-0.5, 0.5]) {
+              const cornerSigns = [
+                [-0.5, -0.5],
+                [0.5, -0.5],
+                [0.5, 0.5],
+                [-0.5, 0.5],
+              ];
+              const quadIndices = cornerSigns.map(([c1, c2]) => {
+                const target = [0, 0, 0, 0];
+                target[fixedDims[0]] = sA;
+                target[fixedDims[1]] = sB;
+                target[d1] = c1;
+                target[d2] = c2;
+                return vertices.findIndex(
+                  (v) => v.type === '8-cell' && distSq4D(v.coords, target) < 1e-6
+                );
+              });
+              faces8.push(quadIndices);
+            }
+          }
+        }
+      }
+
+      // Project an arbitrary 4D point [w, x, y, z] to 2D canvas coordinates
+      function project4DPoint(rawCoords, width, height) {
+        let [w, x, y, z] = rawCoords;
+
+        // 4D Viewing Tilt (XW & YW planes) so the 4th dimension is clearly visible
+        {
+          const c = Math.cos(state.angleXW);
+          const s = Math.sin(state.angleXW);
+          const nx = x * c - w * s;
+          const nw = x * s + w * c;
+          x = nx;
+          w = nw;
+        }
+        {
+          const c = Math.cos(state.angleYW);
+          const s = Math.sin(state.angleYW);
+          const ny = y * c - w * s;
+          const nw = y * s + w * c;
+          y = ny;
+          w = nw;
+        }
+
+        // 4D to 3D Perspective Projection
+        const dist4D = 2.45;
+        const factor4D = 1.65 / (dist4D - w);
+        let x3 = x * factor4D;
+        let y3 = y * factor4D;
+        let z3 = z * factor4D;
+
+        // 3D Camera Rotation
+        {
+          const cy = Math.cos(state.rotY);
+          const sy = Math.sin(state.rotY);
+          const nx = x3 * cy + z3 * sy;
+          const nz = -x3 * sy + z3 * cy;
+          x3 = nx;
+          z3 = nz;
+        }
+        {
+          const cx = Math.cos(state.rotX);
+          const sx = Math.sin(state.rotX);
+          const ny = y3 * cx - z3 * sx;
+          const nz = y3 * sx + z3 * cx;
+          y3 = ny;
+          z3 = nz;
+        }
+
+        // 3D to 2D Perspective Projection
+        const dist3D = 4.2;
+        const scaleBase = Math.min(width, height) * 0.44 * state.zoom;
+        const factor3D = scaleBase / (dist3D - z3);
+
+        return {
+          px: width * 0.5 + x3 * factor3D,
+          py: height * 0.5 - y3 * factor3D,
+          z3,
+          w4: w,
+          scale: factor3D / (scaleBase / dist3D),
+        };
+      }
+
+      function projectVertex(v, width, height) {
+        const rotated4D = applyQuaternionAction(v.coords, state.isoAngle);
+        return project4DPoint(rotated4D, width, height);
+      }
+
+      function updateInspector() {
+        const idx = state.hoveredIndex !== -1 ? state.hoveredIndex : state.selectedIndex;
+        if (idx === -1) {
+          inspectorBadge.className =
+            'px-2 py-0.5 rounded font-semibold bg-slate-800 text-slate-300 border border-slate-700';
+          inspectorBadge.textContent = '頂点未選択';
+          inspectorQuat.textContent = '頂点をクリックまたはホバーすると四元数座標を表示します';
+          inspectorCoord.textContent = '(a, b, c, d) ∈ S³ ⊂ ℝ⁴';
+          return;
+        }
+
+        const v = vertices[idx];
+        if (v.type === '16-cell') {
+          inspectorBadge.className =
+            'px-2 py-0.5 rounded font-semibold bg-rose-500/25 text-rose-200 border border-rose-500/50';
+          inspectorBadge.textContent = '正16胞体 (整数型)';
+        } else {
+          inspectorBadge.className =
+            'px-2 py-0.5 rounded font-semibold bg-sky-500/25 text-sky-200 border border-sky-500/50';
+          inspectorBadge.textContent = '正8胞体 (半整数型)';
+        }
+        inspectorQuat.textContent = `初期位置 q₀ = ${v.label}`;
+        inspectorCoord.textContent = `座標: ${v.coordText}  |  N(q) = 1`;
+      }
+
+      function syncCardStyles() {
+        card16.style.opacity = state.show16 ? '1' : '0.48';
+        card8.style.opacity = state.show8 ? '1' : '0.48';
+        card24Edges.style.opacity = state.show24Edges ? '1' : '0.48';
+      }
+
+      function syncModeUI() {
+        const inactiveClass =
+          'w-full text-left px-3 py-2 rounded-xl border border-slate-700/80 bg-slate-900/50 hover:bg-slate-800/70 text-slate-300 transition flex items-center justify-between';
+
+        modeLeftBtn.className =
+          state.rotationMode === 'left'
+            ? 'w-full text-left px-3 py-2 rounded-xl border border-emerald-400/60 bg-emerald-950/40 text-emerald-200 transition flex items-center justify-between shadow-[0_0_15px_rgba(16,185,129,0.2)]'
+            : inactiveClass;
+
+        modeRightBtn.className =
+          state.rotationMode === 'right'
+            ? 'w-full text-left px-3 py-2 rounded-xl border border-purple-400/60 bg-purple-950/40 text-purple-200 transition flex items-center justify-between shadow-[0_0_15px_rgba(168,85,247,0.2)]'
+            : inactiveClass;
+
+        modeConjBtn.className =
+          state.rotationMode === 'conj'
+            ? 'w-full text-left px-3 py-2 rounded-xl border border-amber-400/60 bg-amber-950/35 text-amber-200 transition flex items-center justify-between shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+            : inactiveClass;
+
+        if (state.rotationMode === 'left') {
+          rotationModeBadge.className =
+            'mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+          rotationModeBadge.textContent = '左掛け: q_L · x';
+          modeExplanation.innerHTML =
+            '<strong class="text-emerald-300">左アイソクリニック回転 (q_L·x)</strong> では、正24胞体の形そのものの対称性は保たれたまま、すべての頂点が静止軸なしで一斉に螺旋軌道（ヴィラソー円）を描き、内と外が裏返るように循環します。';
+        } else if (state.rotationMode === 'right') {
+          rotationModeBadge.className =
+            'mono text-[10px] px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30';
+          rotationModeBadge.textContent = '右掛け: x · q_R⁻¹';
+          modeExplanation.innerHTML =
+            '<strong class="text-purple-300">右アイソクリニック回転 (x·q_R⁻¹)</strong> は、左回転と完全に鏡像関係にある反対向きのねじれ（左キラル）を生成します。軌跡の絡み方が逆転する様子を比較できます。';
+        } else {
+          rotationModeBadge.className =
+            'mono text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30';
+          rotationModeBadge.textContent = '共役: q · x · q⁻¹';
+          modeExplanation.innerHTML =
+            '<strong class="text-amber-300">複合回転 / 共役 (q·x·q⁻¹)</strong> では左右のねじれが相殺され、実軸（+1 と -1）が完全に静止します。他の頂点は通常の3次元空間の同心円軌道を描き、裏返り（ねじれ）は起きません。';
+        }
+      }
+
+      function syncAxisUI() {
+        if (state.generatorAxis === 'c6') {
+          axisC6Btn.className =
+            'px-2 py-1 rounded bg-indigo-500/30 border border-indigo-400/50 text-indigo-200 mono text-[11px] font-semibold';
+          axisC4Btn.className =
+            'px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 mono text-[11px]';
+        } else {
+          axisC4Btn.className =
+            'px-2 py-1 rounded bg-indigo-500/30 border border-indigo-400/50 text-indigo-200 mono text-[11px] font-semibold';
+          axisC6Btn.className =
+            'px-2 py-1 rounded bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 mono text-[11px]';
+        }
+      }
+
+      function resizeCanvas() {
+        const rect = wrapper.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+        canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      // Main Render Loop
+      let projected = [];
+      let lastTime = performance.now();
+
+      function render(now) {
+        const dt = Math.min((now - lastTime) / 1000, 0.05);
+        lastTime = now;
+
+        if (state.auto4D) {
+          state.isoAngle = (state.isoAngle + dt * 0.55) % (Math.PI * 2);
+          const deg = Math.round((state.isoAngle * 180) / Math.PI) % 360;
+          sliderIso.value = deg;
+          valIso.textContent = `${deg}°`;
+        }
+
+        const width = wrapper.clientWidth;
+        const height = wrapper.clientHeight;
+
+        ctx.clearRect(0, 0, width, height);
+
+        // Subtle radial ambient backdrop
+        const bgGrad = ctx.createRadialGradient(
+          width * 0.5,
+          height * 0.5,
+          10,
+          width * 0.5,
+          height * 0.5,
+          Math.max(width, height) * 0.65
+        );
+        bgGrad.addColorStop(0, 'rgba(30, 58, 138, 0.14)');
+        bgGrad.addColorStop(0.55, 'rgba(15, 23, 42, 0.06)');
+        bgGrad.addColorStop(1, 'rgba(3, 5, 12, 0)');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Project all 24 vertices
+        projected = vertices.map((v) => projectVertex(v, width, height));
+
+        // 0. Draw Chiral Vortex Trails (Hopf Fibration / Clifford Circles)
+        if (state.showTrails) {
+          const trailSteps = 22;
+          const trailSpan = Math.PI * 0.72; // Show trailing arc behind each active vertex
+          const activeVertex = state.hoveredIndex !== -1 ? state.hoveredIndex : state.selectedIndex;
+
+          for (let idx = 0; idx < vertices.length; idx++) {
+            const v = vertices[idx];
+            if (v.type === '16-cell' && !state.show16 && !state.show24Edges) continue;
+            if (v.type === '8-cell' && !state.show8 && !state.show24Edges) continue;
+
+            const isHighlighted = idx === activeVertex;
+            // Draw trails for all 16-cell vertices + selected/hovered + representative 8-cell vertices so it stays crisp
+            if (!isHighlighted && v.type === '8-cell' && idx % 2 !== 0) continue;
+
+            ctx.beginPath();
+            for (let s = 0; s <= trailSteps; s++) {
+              const tOffset = -(s / trailSteps) * trailSpan;
+              const pt4D = applyQuaternionAction(v.coords, state.isoAngle + tOffset);
+              const pt2D = project4DPoint(pt4D, width, height);
+              if (s === 0) {
+                ctx.moveTo(pt2D.px, pt2D.py);
+              } else {
+                ctx.lineTo(pt2D.px, pt2D.py);
+              }
+            }
+
+            if (isHighlighted) {
+              ctx.strokeStyle = 'rgba(250, 204, 21, 0.85)';
+              ctx.lineWidth = 2.4;
+            } else if (state.rotationMode === 'left') {
+              ctx.strokeStyle =
+                v.type === '16-cell'
+                  ? 'rgba(52, 211, 153, 0.34)'
+                  : 'rgba(56, 189, 248, 0.22)';
+              ctx.lineWidth = v.type === '16-cell' ? 1.4 : 1.0;
+            } else if (state.rotationMode === 'right') {
+              ctx.strokeStyle =
+                v.type === '16-cell'
+                  ? 'rgba(192, 132, 252, 0.36)'
+                  : 'rgba(244, 114, 182, 0.22)';
+              ctx.lineWidth = v.type === '16-cell' ? 1.4 : 1.0;
+            } else {
+              ctx.strokeStyle = 'rgba(251, 191, 36, 0.26)';
+              ctx.lineWidth = 1.2;
+            }
+            ctx.stroke();
+          }
+        }
+
+        // 1. Draw translucent 8-cell faces
+        if (state.show8 && state.showFaces) {
+          const sortedFaces = faces8
+            .map((quad) => {
+              const avgZ =
+                (projected[quad[0]].z3 +
+                  projected[quad[1]].z3 +
+                  projected[quad[2]].z3 +
+                  projected[quad[3]].z3) /
+                4;
+              return { quad, avgZ };
+            })
+            .sort((a, b) => a.avgZ - b.avgZ);
+
+          for (const { quad, avgZ } of sortedFaces) {
+            const p0 = projected[quad[0]];
+            const p1 = projected[quad[1]];
+            const p2 = projected[quad[2]];
+            const p3 = projected[quad[3]];
+
+            const alpha = Math.max(0.015, Math.min(0.065, 0.035 + avgZ * 0.015));
+            ctx.beginPath();
+            ctx.moveTo(p0.px, p0.py);
+            ctx.lineTo(p1.px, p1.py);
+            ctx.lineTo(p2.px, p2.py);
+            ctx.lineTo(p3.px, p3.py);
+            ctx.closePath();
+            ctx.fillStyle = `rgba(56, 189, 248, ${alpha.toFixed(3)})`;
+            ctx.fill();
+          }
+        }
+
+        // Collect active edges
+        const activeEdges = [];
+        if (state.show24Edges) {
+          for (const [i, j] of edgesCross) {
+            activeEdges.push({
+              i,
+              j,
+              kind: 'cross',
+              avgZ: (projected[i].z3 + projected[j].z3) * 0.5,
+            });
+          }
+        }
+        if (state.show16) {
+          for (const [i, j] of edges16) {
+            activeEdges.push({
+              i,
+              j,
+              kind: '16-cell',
+              avgZ: (projected[i].z3 + projected[j].z3) * 0.5,
+            });
+          }
+        }
+        if (state.show8) {
+          for (const [i, j] of edges8) {
+            activeEdges.push({
+              i,
+              j,
+              kind: '8-cell',
+              avgZ: (projected[i].z3 + projected[j].z3) * 0.5,
+            });
+          }
+        }
+
+        activeEdges.sort((a, b) => a.avgZ - b.avgZ);
+
+        // 2. Render Edges
+        const activeVertex = state.hoveredIndex !== -1 ? state.hoveredIndex : state.selectedIndex;
+
+        for (const edge of activeEdges) {
+          const pA = projected[edge.i];
+          const pB = projected[edge.j];
+          const depthNorm = Math.max(0.25, Math.min(1.0, (edge.avgZ + 1.8) / 3.2));
+          const isIncident = activeVertex !== -1 && (edge.i === activeVertex || edge.j === activeVertex);
+
+          ctx.beginPath();
+          ctx.moveTo(pA.px, pA.py);
+          ctx.lineTo(pB.px, pB.py);
+
+          if (edge.kind === '16-cell') {
+            ctx.strokeStyle = isIncident
+              ? 'rgba(255, 160, 180, 0.95)'
+              : `rgba(244, 63, 94, ${(0.25 + depthNorm * 0.65).toFixed(2)})`;
+            ctx.lineWidth = isIncident ? 3.0 : 1.1 + depthNorm * 1.3;
+            ctx.shadowColor = 'rgba(244, 63, 94, 0.75)';
+            ctx.shadowBlur = isIncident ? 14 : 6 * depthNorm;
+          } else if (edge.kind === '8-cell') {
+            ctx.strokeStyle = isIncident
+              ? 'rgba(186, 230, 253, 0.98)'
+              : `rgba(56, 189, 248, ${(0.28 + depthNorm * 0.67).toFixed(2)})`;
+            ctx.lineWidth = isIncident ? 3.2 : 1.2 + depthNorm * 1.5;
+            ctx.shadowColor = 'rgba(56, 189, 248, 0.85)';
+            ctx.shadowBlur = isIncident ? 14 : 7 * depthNorm;
+          } else {
+            ctx.strokeStyle = isIncident
+              ? 'rgba(253, 224, 71, 0.9)'
+              : `rgba(250, 204, 21, ${(0.08 + depthNorm * 0.24).toFixed(2)})`;
+            ctx.lineWidth = isIncident ? 2.2 : 0.8 + depthNorm * 0.5;
+            ctx.shadowColor = isIncident ? 'rgba(250, 204, 21, 0.7)' : 'transparent';
+            ctx.shadowBlur = isIncident ? 10 : 0;
+          }
+
+          ctx.stroke();
+        }
+
+        ctx.shadowBlur = 0;
+
+        // 3. Render Vertices
+        const sortedVertices = vertices
+          .map((v, idx) => ({ v, idx, proj: projected[idx] }))
+          .sort((a, b) => a.proj.z3 - b.proj.z3);
+
+        for (const { v, idx, proj } of sortedVertices) {
+          if (v.type === '16-cell' && !state.show16 && !state.show24Edges) continue;
+          if (v.type === '8-cell' && !state.show8 && !state.show24Edges) continue;
+
+          const isDimmed =
+            (v.type === '16-cell' && !state.show16) ||
+            (v.type === '8-cell' && !state.show8);
+
+          const isHovered = idx === state.hoveredIndex;
+          const isSelected = idx === state.selectedIndex;
+          const baseRadius = v.type === '16-cell' ? 5.2 : 4.4;
+          const radius =
+            baseRadius * Math.max(0.7, Math.min(1.45, proj.scale)) +
+            (isHovered || isSelected ? 3.2 : 0);
+
+          ctx.beginPath();
+          ctx.arc(proj.px, proj.py, radius * 2.1, 0, Math.PI * 2);
+          if (v.type === '16-cell') {
+            ctx.fillStyle = isDimmed
+              ? 'rgba(244, 63, 94, 0.08)'
+              : 'rgba(244, 63, 94, 0.26)';
+          } else {
+            ctx.fillStyle = isDimmed
+              ? 'rgba(56, 189, 248, 0.08)'
+              : 'rgba(56, 189, 248, 0.26)';
+          }
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(proj.px, proj.py, radius, 0, Math.PI * 2);
+          if (v.type === '16-cell') {
+            ctx.fillStyle = isDimmed ? '#881337' : isHovered || isSelected ? '#ffe4e6' : '#fb7185';
+          } else {
+            ctx.fillStyle = isDimmed ? '#0c4a6e' : isHovered || isSelected ? '#e0f2fe' : '#38bdf8';
+          }
+          ctx.fill();
+
+          if (isSelected || isHovered) {
+            ctx.beginPath();
+            ctx.arc(proj.px, proj.py, radius + 3.5, 0, Math.PI * 2);
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
+          }
+
+          if (state.showLabels || isHovered || isSelected) {
+            const textToDraw =
+              isHovered || isSelected
+                ? v.label
+                : v.type === '16-cell' && state.show16
+                ? v.shortLabel
+                : '';
+
+            if (textToDraw) {
+              ctx.font =
+                isHovered || isSelected
+                  ? '600 12px "JetBrains Mono", monospace'
+                  : '600 11px "JetBrains Mono", monospace';
+              ctx.fillStyle =
+                isHovered || isSelected
+                  ? '#fef08a'
+                  : v.type === '16-cell'
+                  ? 'rgba(254, 205, 211, 0.92)'
+                  : 'rgba(186, 230, 253, 0.92)';
+              ctx.fillText(textToDraw, proj.px + radius + 5, proj.py + 4);
+            }
+          }
+        }
+
+        requestAnimationFrame(render);
+      }
+
+      requestAnimationFrame(render);
+
+      // Pointer / Mouse / Touch Interaction
+      let isDragging = false;
+      let dragMoved = false;
+      let prevX = 0;
+      let prevY = 0;
+      let pinchStartDist = 0;
+      let pinchStartZoom = 1;
+
+      function getPointerPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        if (e.touches && e.touches.length > 0) {
+          return {
+            x: e.touches[0].clientX - rect.left,
+            y: e.touches[0].clientY - rect.top,
+          };
+        }
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        };
+      }
+
+      function findNearestVertex(px, py) {
+        let bestIdx = -1;
+        let bestDist = 18;
+        for (let i = 0; i < projected.length; i++) {
+          const v = vertices[i];
+          if (v.type === '16-cell' && !state.show16 && !state.show24Edges) continue;
+          if (v.type === '8-cell' && !state.show8 && !state.show24Edges) continue;
+
+          const dx = projected[i].px - px;
+          const dy = projected[i].py - py;
+          const d = Math.hypot(dx, dy);
+          if (d < bestDist) {
+            bestDist = d;
+            bestIdx = i;
+          }
+        }
+        return bestIdx;
+      }
+
+      canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        dragMoved = false;
+        const pos = getPointerPos(e);
+        prevX = pos.x;
+        prevY = pos.y;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        const pos = getPointerPos(e);
+        if (isDragging) {
+          const dx = pos.x - prevX;
+          const dy = pos.y - prevY;
+          if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragMoved = true;
+          state.rotY += dx * 0.008;
+          state.rotX += dy * 0.008;
+          prevX = pos.x;
+          prevY = pos.y;
+        } else {
+          const hit = findNearestVertex(pos.x, pos.y);
+          if (hit !== state.hoveredIndex) {
+            state.hoveredIndex = hit;
+            canvas.style.cursor = hit !== -1 ? 'pointer' : 'grab';
+            updateInspector();
+          }
+        }
+      });
+
+      window.addEventListener('mouseup', (e) => {
+        if (isDragging && !dragMoved) {
+          const pos = getPointerPos(e);
+          const hit = findNearestVertex(pos.x, pos.y);
+          state.selectedIndex = hit === state.selectedIndex ? -1 : hit;
+          updateInspector();
+        }
+        isDragging = false;
+      });
+
+      canvas.addEventListener(
+        'wheel',
+        (e) => {
+          e.preventDefault();
+          const factor = e.deltaY > 0 ? 0.92 : 1.08;
+          state.zoom = Math.max(0.45, Math.min(2.6, state.zoom * factor));
+        },
+        { passive: false }
+      );
+
+      canvas.addEventListener(
+        'touchstart',
+        (e) => {
+          if (e.touches.length === 1) {
+            isDragging = true;
+            dragMoved = false;
+            const pos = getPointerPos(e);
+            prevX = pos.x;
+            prevY = pos.y;
+          } else if (e.touches.length === 2) {
+            isDragging = false;
+            pinchStartDist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            pinchStartZoom = state.zoom;
+          }
+        },
+        { passive: true }
+      );
+
+      canvas.addEventListener(
+        'touchmove',
+        (e) => {
+          if (e.touches.length === 1 && isDragging) {
+            const pos = getPointerPos(e);
+            const dx = pos.x - prevX;
+            const dy = pos.y - prevY;
+            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragMoved = true;
+            state.rotY += dx * 0.009;
+            state.rotX += dy * 0.009;
+            prevX = pos.x;
+            prevY = pos.y;
+          } else if (e.touches.length === 2 && pinchStartDist > 0) {
+            const dist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            state.zoom = Math.max(
+              0.45,
+              Math.min(2.6, pinchStartZoom * (dist / pinchStartDist))
+            );
+          }
+        },
+        { passive: true }
+      );
+
+      canvas.addEventListener('touchend', (e) => {
+        if (isDragging && !dragMoved && e.changedTouches.length > 0) {
+          const rect = canvas.getBoundingClientRect();
+          const x = e.changedTouches[0].clientX - rect.left;
+          const y = e.changedTouches[0].clientY - rect.top;
+          const hit = findNearestVertex(x, y);
+          state.selectedIndex = hit === state.selectedIndex ? -1 : hit;
+          updateInspector();
+        }
+        isDragging = false;
+      });
+
+      // Layer Checkboxes
+      toggle16.addEventListener('change', () => {
+        state.show16 = toggle16.checked;
+        syncCardStyles();
+      });
+      toggle8.addEventListener('change', () => {
+        state.show8 = toggle8.checked;
+        syncCardStyles();
+      });
+      toggle24Edges.addEventListener('change', () => {
+        state.show24Edges = toggle24Edges.checked;
+        syncCardStyles();
+      });
+      toggleLabels.addEventListener('change', () => {
+        state.showLabels = toggleLabels.checked;
+      });
+      toggleFaces.addEventListener('change', () => {
+        state.showFaces = toggleFaces.checked;
+      });
+      toggleTrails.addEventListener('change', () => {
+        state.showTrails = toggleTrails.checked;
+      });
+
+      // Quick Filter Pills
+      pillAll.addEventListener('click', () => {
+        state.show16 = true;
+        state.show8 = true;
+        state.show24Edges = true;
+        toggle16.checked = true;
+        toggle8.checked = true;
+        toggle24Edges.checked = true;
+        syncCardStyles();
+      });
+      pill16.addEventListener('click', () => {
+        state.show16 = true;
+        state.show8 = false;
+        state.show24Edges = false;
+        toggle16.checked = true;
+        toggle8.checked = false;
+        toggle24Edges.checked = false;
+        syncCardStyles();
+      });
+      pill8.addEventListener('click', () => {
+        state.show16 = false;
+        state.show8 = true;
+        state.show24Edges = false;
+        toggle16.checked = false;
+        toggle8.checked = true;
+        toggle24Edges.checked = false;
+        syncCardStyles();
+      });
+
+      // Isoclinic Mode Buttons
+      modeLeftBtn.addEventListener('click', () => {
+        state.rotationMode = 'left';
+        syncModeUI();
+      });
+      modeRightBtn.addEventListener('click', () => {
+        state.rotationMode = 'right';
+        syncModeUI();
+      });
+      modeConjBtn.addEventListener('click', () => {
+        state.rotationMode = 'conj';
+        syncModeUI();
+      });
+
+      // Axis Buttons
+      axisC6Btn.addEventListener('click', () => {
+        state.generatorAxis = 'c6';
+        syncAxisUI();
+      });
+      axisC4Btn.addEventListener('click', () => {
+        state.generatorAxis = 'c4';
+        syncAxisUI();
+      });
+
+      // Sliders
+      function stopAuto4D() {
+        if (state.auto4D) {
+          state.auto4D = false;
+          btnAuto4D.innerHTML =
+            '<span class="w-2 h-2 rounded-full bg-slate-500"></span><span>4D回転: OFF</span>';
+          btnAuto4D.className =
+            'px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition flex items-center gap-1.5';
+        }
+      }
+
+      sliderIso.addEventListener('input', () => {
+        stopAuto4D();
+        state.isoAngle = (Number(sliderIso.value) * Math.PI) / 180;
+        valIso.textContent = `${sliderIso.value}°`;
+      });
+
+      sliderXW.addEventListener('input', () => {
+        state.angleXW = (Number(sliderXW.value) * Math.PI) / 180;
+        valXW.textContent = `${sliderXW.value}°`;
+      });
+
+      sliderYW.addEventListener('input', () => {
+        state.angleYW = (Number(sliderYW.value) * Math.PI) / 180;
+        valYW.textContent = `${sliderYW.value}°`;
+      });
+
+      btnAuto4D.addEventListener('click', () => {
+        state.auto4D = !state.auto4D;
+        if (state.auto4D) {
+          btnAuto4D.innerHTML =
+            '<span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span><span>4D回転: ON</span>';
+          btnAuto4D.className =
+            'px-3 py-1.5 text-xs font-medium rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 transition flex items-center gap-1.5';
+        } else {
+          stopAuto4D();
+        }
+      });
+
+      btnReset4D.addEventListener('click', () => {
+        stopAuto4D();
+        state.isoAngle = 0;
+        state.angleXW = 0;
+        state.angleYW = 0;
+        sliderIso.value = 0;
+        sliderXW.value = 0;
+        sliderYW.value = 0;
+        valIso.textContent = '0°';
+        valXW.textContent = '0°';
+        valYW.textContent = '0°';
+      });
+
+      btnPresetClassic.addEventListener('click', () => {
+        state.rotX = 0.34;
+        state.rotY = -0.55;
+        state.zoom = 1.0;
+        state.angleXW = (20 * Math.PI) / 180;
+        state.angleYW = (15 * Math.PI) / 180;
+        sliderXW.value = 20;
+        sliderYW.value = 15;
+        valXW.textContent = '20°';
+        valYW.textContent = '15°';
+      });
+
+      syncCardStyles();
+      syncModeUI();
+      syncAxisUI();
+    })();
+  </script>
+</body>
+</html>
