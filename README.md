@@ -10,7 +10,9 @@
 
 All eight repositories in this project are governed by a single discrete algebraic mechanism: orthogonal projection ($P_1 + P_2 = 1,\; P_1 P_2 = 0$) operating under a fundamental cyclic frame rate ($C_n$), without continuous clocks or metric rulers. Across every scale—from discrete time, Higgs lattice locking, cosmic phase transitions, particle generations, solar fusion, and rotating black holes to wireless signal modulation—the same dual process repeats: condensing symmetry into a closed principal ideal ($P_1$) while ejecting residual degrees of freedom as orthogonal exhaust ($P_2$, structural apoptosis).
 
-本プロジェクトの8つのリポジトリは、すべて同一の離散代数メカニズム――基本フレームレート $C_n$ のもとでの直交射影 ( $P_1 + P_2 = 1,\; P_1 P_2 = 0$ ) ――によって貫かれています。離散時間・ヒッグス格子から宇宙相転移、素粒子、太陽核融合、回転ブラックホール、そして情報通信の空間変調に至るあらゆる階層において、**「対称性を閉じた単項イデアル ( $P_1$ ) へ回収・凝縮する作用」**と**「余剰自由度を直交補空間 ( $P_2$ ) へアポトーシス排出する作用」**が自己相似的に繰り返されます。
+All nine repositories in this project are governed by a single discrete algebraic mechanism: orthogonal projection ($P_1 + P_2 = 1,\; P_1 P_2 = 0$) operating under a fundamental cyclic frame rate ($C_n$), without continuous clocks or metric rulers. Across every scale—from discrete time, Higgs lattice locking, cosmic phase transitions, particle generations, solar fusion, rotating black holes, wireless signal modulation, and spatial AI to higher-order phase-coupling topology—the same dual process repeats: condensing symmetry into a closed principal ideal ($P_1$) while ejecting residual degrees of freedom as orthogonal exhaust ($P_2$, structural apoptosis).
+
+本プロジェクトの9つのリポジトリは、すべて同一の離散代数メカニズム――基本フレームレート $C_n$ のもとでの直交射影 ( $P_1 + P_2 = 1,\; P_1 P_2 = 0$ ) ――によって貫かれています。離散時間・ヒッグス格子から宇宙相転移、素粒子、太陽核融合、回転ブラックホール、空間変調・空間AI、そして高次位相結合トポロジーに至るあらゆる階層において、**「対称性を閉じた単項イデアル ( $P_1$ ) へ回収・凝縮する作用」**と**「余剰自由度を直交補空間 ( $P_2$ ) へアポトーシス排出する作用」**が自己相似的に繰り返されます。
 
 | Scale & Domain / 階層・領域 | Internal Condensation ($P_1$: Principal Ideal) / 内部への回収 | Orthogonal Exhaust ($P_2$: Apoptosis) / 余剰自由度の排出 | Repository / リポジトリ |
 | :--- | :--- | :--- | :--- |
@@ -21,7 +23,8 @@ All eight repositories in this project are governed by a single discrete algebra
 | **4. Stellar Nuclear Fusion**<br>太陽PPチェーン・ニュートリノ | Closed $^4\text{He}$ nucleus ($\alpha$-particle) as a spin-0 principal ideal | Neutrinos ($\nu_e$: $C_n$ phase-angle residue on $K=0$) & photons ($\gamma$) | [Discrete-PP-Chain-Neutrino-Phase-Model](https://github.com/MU-300/Discrete-PP-Chain-Neutrino-Phase-Model) |
 | **5. Black Holes & Cosmic Web**<br>回転ブラックホール・銀河網 | Ring singularity as an algebraic Zero-Seat principal-ideal anchor | Hawking radiation, polar jets, and $S^3$ stereographic filament web | [Rotating-Black-Hole-Geometric-Map](https://github.com/MU-300/Rotating-Black-Hole-Geometric-Map) |
 | **6. Applied Information & Signal**<br>応用・4次元空間変調と情報幾何 | Self-synchronizing quaternion frame ($C_{12} / C_{60}$) on $S^3$ | Orthogonal channel separation & noise pruning | [4d-quaternion-spatial-modulation](https://github.com/MU-300/4d-quaternion-spatial-modulation) |
-|**7. Applied Spatial AI**<br>応用・4次元四元数空間AI | Algebraic rounding into invariant principal ideals (Zero-Seats) | Spontaneous pruning of redundant degrees of freedom (apoptosis) | [4d-quaternion-spatial-ai-architecture](https://github.com/MU-300/4d-quaternion-spatial-ai-architecture) |
+| **7. Applied Spatial AI**<br>応用・4次元四元数空間AI | Algebraic rounding into invariant principal ideals (Zero-Seats) | Spontaneous pruning of redundant degrees of freedom (apoptosis) | [4d-quaternion-spatial-ai-architecture](https://github.com/MU-300/4d-quaternion-spatial-ai-architecture) |
+| **8. Higher-Order Phase-Coupling**<br>高次位相結合トポロジー | Hopf-wound $E_8$ coherence in local discrete closed domains ($P_1+P_2=1$) | Boundary apoptosis of thermal/non-synchronous degrees of freedom ($P_2$) | [Hopf-Wound-E8-Phase-Coupling-Topology](https://github.com/MU-300/Hopf-Wound-E8-Phase-Coupling-Topology) |
 ---
 
 ### License / ライセンス
